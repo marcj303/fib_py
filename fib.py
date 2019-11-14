@@ -72,54 +72,56 @@ def fib_formula(n):
     val = (golden_ratio**n - (1 - golden_ratio)**n) / math.sqrt(5)
     return int(round(val))
 
-# Using derived formula
+# Using derived fast doubling formula
 # F(2n-1) = F(n-1)**2 + F(n)**2
 # F(2n) = ( 2 F(n-1) + F(n) ) F(n)
 
-# recursive formula version
-def fibr3(n):
+# recursive fast doubleing formula version
+def fibrfd(n):
     if n in (0,1):
         return n
     # if n is even
     if n % 2 == 0:
         a = n/2
         b = n/2 - 1
-        fa = fibr3(a)
-        fb = fibr3(b)
+        fa = fibrfd(a)
+        fb = fibrfd(b)
         return int(fa * (fa + 2 * fb))
     else:
         #n is odd
         a = (n + 1)/2
         b = (n + 1)/2 - 1
-        fa = fibr3(a)
-        fb = fibr3(b)
+        fa = fibrfd(a)
+        fb = fibrfd(b)
         return int(fa * fa + fb * fb)
 
-# TODO itereative formula version
-def fibr4(n):
-    if n in (0,1):
-        return n
-    # if n is even
-    if n % 2 == 0:
-        a = n/2
-        b = n/2 - 1
-        fa = fibr4(a)
-        fb = fibr4(b)
-        print("a: ", a, " fa: ", fa, " b:", b, " fb: ", fb)
-        return int(fa * (fa + 2 * fb))
-    else:
-        #n is odd
-        a = (n + 1)/2
-        b = (n + 1)/2 - 1
-        fa = fibr4(a)
-        fb = fibr4(b)
-        print("a: ", a, " fa: ", fa, " b:", b, " fb: ", fb)
-        return int(fa * fa + fb * fb)
+# itereative fast doubling version
+# https://funloop.org/post/2017-04-14-computing-fibonacci-numbers.html
+def fibifd(n):
+    ns = []
+    while n:
+        ns.extend([n])
+        n >>= 1
+
+    a, b = 0, 1
+
+    while ns:
+        n = ns.pop()
+        c = a * ((b << 1) - a)
+        d = a * a + b * b
+        if n & 1:
+            a, b = d, c + d
+        else:
+            a, b = c, d
+
+    return a
 
 # Time and print our functions. Note that the recursive function starts to get big around the
 # 30th number, so we use that as the standard.
 print("fib(30): ", fib(30), " ", timeit.timeit("fib(30)", setup="from __main__ import fib",number=1))
-print("fibitar(175): ", fibitar(175), " ", timeit.timeit("fibitar(175)", setup="from __main__ import fibitar",number=1))
-print("fibitv(175): ", fibitv(175), " ", timeit.timeit("fibitv(175)", setup="from __main__ import fibitv",number=1))
-print("fib_matrix(175): \n", fib_matrix(175), " ", timeit.timeit("fib_matrix(175)", setup="from __main__ import fib_matrix",number=1))
-print("fib_formula(175): ", fib_formula(175), " ", timeit.timeit("fib_formula(175)", setup="from __main__ import fib_formula",number=1))
+print("fibitar(500): ", fibitar(500), " ", timeit.timeit("fibitar(500)", setup="from __main__ import fibitar",number=1))
+print("fibitv(500): ", fibitv(500), " ", timeit.timeit("fibitv(500)", setup="from __main__ import fibitv",number=1))
+print("fib_matrix(500): \n", fib_matrix(500), " ", timeit.timeit("fib_matrix(500)", setup="from __main__ import fib_matrix",number=1))
+print("fib_formula(500): ", fib_formula(500), " ", timeit.timeit("fib_formula(500)", setup="from __main__ import fib_formula",number=1))
+print("fibrfd(500): ", fibrfd(500), " ", timeit.timeit("fibrfd(500)", setup="from __main__ import fibrfd",number=1))
+print("fibifd(500): ", fibifd(500), " ", timeit.timeit("fibifd(500)", setup="from __main__ import fibifd",number=1))
