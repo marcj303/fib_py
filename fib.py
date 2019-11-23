@@ -17,6 +17,7 @@
 import timeit
 import numpy as np
 import math
+import functools
 
 # This is a recursive function to calculate a fibonacci number. This function
 # is very slow since it calculates each number in the sequence. Python also has
@@ -61,6 +62,7 @@ def fibitv(n):
 ### and formulas derived from the basic fibonacci algorythm.
 
 # Using matrix math
+# There is something wrong with this at large numbers and maybe an off by one issue.
 def fib_matrix(n):
     Matrix = np.matrix([[0,1],[1,1]])
     vec = np.array([[0],[1]])
@@ -116,6 +118,46 @@ def fibifd(n):
 
     return a
 
+# Decorator cache function
+# https://realpython.com/primer-on-python-decorators/
+def cache(func):
+    """Keep a cache of previous function calls"""
+    @functools.wraps(func)
+    def wrapper_cache(*args, **kwargs):
+        cache_key = args + tuple(kwargs.items())
+        if cache_key not in wrapper_cache.cache:
+            wrapper_cache.cache[cache_key] = func(*args, **kwargs)
+        return wrapper_cache.cache[cache_key]
+    wrapper_cache.cache = dict()
+    return wrapper_cache
+
+# recursive fast doubleing formula version
+@cache
+def fibrfdc(n):
+    if n in (0,1):
+        return n
+    # if n is even
+    if n % 2 == 0:
+        a = n/2
+        b = n/2 - 1
+        fa = fibrfd(a)
+        fb = fibrfd(b)
+        return int(fa * (fa + 2 * fb))
+    else:
+        #n is odd
+        a = (n + 1)/2
+        b = (n + 1)/2 - 1
+        fa = fibrfd(a)
+        fb = fibrfd(b)
+        return int(fa * fa + fb * fb)
+
+@cache
+def fibonacci(num):
+    if num < 2:
+        return num
+    return fibonacci(num - 1) + fibonacci(num - 2)
+
+
 # Time and print our functions. Note that the recursive function starts to get big around the
 # 30th number, so we use that as the standard.
 print("fib(30): ", fib(30), " ", timeit.timeit("fib(30)", setup="from __main__ import fib",number=1))
@@ -125,3 +167,4 @@ print("fib_matrix(500): \n", fib_matrix(500), " ", timeit.timeit("fib_matrix(500
 print("fib_formula(500): ", fib_formula(500), " ", timeit.timeit("fib_formula(500)", setup="from __main__ import fib_formula",number=1))
 print("fibrfd(500): ", fibrfd(500), " ", timeit.timeit("fibrfd(500)", setup="from __main__ import fibrfd",number=1))
 print("fibifd(500): ", fibifd(500), " ", timeit.timeit("fibifd(500)", setup="from __main__ import fibifd",number=1))
+print("fibrfdc(10001): ", timeit.timeit("fibrfdc(10001)", setup="from __main__ import fibrfdc", number=1), " ", fibrfdc(10001))
